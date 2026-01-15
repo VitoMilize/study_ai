@@ -65,7 +65,7 @@ class MainHandler(tornado.web.RequestHandler):
 
 
 class AnalyticsHandler(tornado.web.RequestHandler):
-    """Provide analytical metrics about the system."""
+    """Provide analytical metrics about the system"""
 
     def get(self):
         try:
