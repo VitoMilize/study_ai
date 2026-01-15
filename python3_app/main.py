@@ -63,6 +63,7 @@ class MainHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/index.html")
 
+
 class AnalyticsHandler(tornado.web.RequestHandler):
     """Provide analytical metrics about the system."""
 
@@ -108,6 +109,7 @@ class AnalyticsHandler(tornado.web.RequestHandler):
         except redis.exceptions.ConnectionError:
             self.set_status(400)
             self.write({"error": "Redis connection refused"})
+
 
 class BaseHandler(tornado.web.RequestHandler):
     """Base handler with common get_items logic."""
@@ -295,7 +297,6 @@ def make_app():
         (r"/doctor-patient", DoctorPatientHandler),
         (r"/analytics", AnalyticsHandler),
     ], autoreload=True, debug=True, compiled_template_cache=False, serve_traceback=True)
-
 
 
 if __name__ == "__main__":
