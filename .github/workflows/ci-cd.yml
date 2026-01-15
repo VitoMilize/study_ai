@@ -39,7 +39,7 @@ jobs:
         run: |
           python -c "import redis, tornado; print('Imports OK')"
 
-  docker-build-and-push:
+  docker-build-and-deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
     steps:
@@ -57,3 +57,25 @@ jobs:
 
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/hospital-app:latest
+
+      # Развёртывание на сервере через SSH
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          script: |
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/hospital-app:latest
+            docker stop hospital-app || true
+            docker rm hospital-app || true
+            docker run -d -p 8888:8888 --name hospital-app ${{ secrets.DOCKERHUB_USERNAME }}/hospital-app:latest
+
+      # Локальный тест контейнера (опционально, если нужен runner-based тест)
+      - name: Run container locally (test)
+        if: github.event_name == 'push'
+        run: |
+          docker stop hospital-app || true
+          docker rm hospital-app || true
+          docker run -d -p 8888:8888 --name hospital-app ${{ secrets.DOCKERHUB_USERNAME }}/hospital-app:latest
